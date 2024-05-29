@@ -406,6 +406,8 @@ typedef struct {
 #define EFI_PCIE_CAPABILITY_ID_SRIOV  0x10
 #define EFI_PCIE_CAPABILITY_ID_MRIOV  0x11
 
+#define EFI_PCIE_CAPABILITY_ID_DOE    0x2E
+
 typedef struct {
   UINT32    CapabilityHeader;
   UINT32    Capability;

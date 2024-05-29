@@ -20,6 +20,8 @@
 
 typedef struct _EFI_PCI_IO_PROTOCOL EFI_PCI_IO_PROTOCOL;
 
+typedef struct _EFI_PCI_IO_DOE EFI_PCI_IO_DOE;
+
 ///
 /// *******************************************************
 /// EFI_PCI_IO_PROTOCOL_WIDTH
@@ -544,6 +546,64 @@ struct _EFI_PCI_IO_PROTOCOL {
   /// the RomImage buffer was initialized.
   ///
   VOID    *RomImage;
+};
+
+/**
+  Check if a specific Vendor ID and Data Object Type is supported
+
+  @param  This                  A pointer to the EFI_PCI_IO_PROTOCOL instance.
+  @param  VendorId              The Vendor ID to check against
+  @param  Type                  The Data Object Type to check against
+
+  @retval EFI_SUCCESS           The operation on the PCI controller's attributes was completed.
+  @retval EFI_INVALID_PARAMETER One or more parameters are invalid.
+  @retval EFI_UNSUPPORTED       DOE is not supported or the VendorId and Type are not supported
+
+**/
+typedef
+EFI_STATUS
+(EFIAPI *EFI_PCI_IO_DOE_TYPE_CHECK)(
+  IN EFI_PCI_IO_PROTOCOL              *This,
+  IN     UINTN                        VendorId,
+  IN     UINTN                        Type
+  );
+
+/**
+  Performs an send or receive operation on a DOE Mailbox
+
+  @param  This                  A pointer to the EFI_PCI_IO_PROTOCOL instance.
+  @param  Count                 The number of bytes to use in the write operation or the maximum number
+                                of bytes to read for a read operation.
+                                For read operations it is set to the number of bytes read.
+  @param  Buffer                For read operations, the destination buffer to store the results. For write
+                                operations, the source buffer to write data from.
+
+  @retval EFI_SUCCESS           The operation on the PCI controller's attributes was completed.
+  @retval EFI_INVALID_PARAMETER One or more parameters are invalid.
+  @retval EFI_UNSUPPORTED       DOE is not supported
+
+**/
+typedef
+EFI_STATUS
+(EFIAPI *EFI_PCI_IO_DOE_MAILBOX)(
+  IN EFI_PCI_IO_PROTOCOL              *This,
+  IN OUT UINTN                        *Count,
+  IN OUT VOID                         *Buffer
+  );
+
+struct _EFI_PCI_IO_DOE {
+  ///
+  /// Check if a specific Vendor ID and Data Object Type is supported
+  ///
+  EFI_PCI_IO_DOE_TYPE_CHECK CheckType;
+  ///
+  /// Send data to the DOE mailbox
+  ///
+  EFI_PCI_IO_DOE_MAILBOX    Send;
+  ///
+  /// Receive data from the DOE mailbox
+  ///
+  EFI_PCI_IO_DOE_MAILBOX    Receive;
 };
 
 extern EFI_GUID  gEfiPciIoProtocolGuid;

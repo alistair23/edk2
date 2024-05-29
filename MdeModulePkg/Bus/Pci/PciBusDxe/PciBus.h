@@ -78,6 +78,7 @@ typedef enum {
 #include "PciOptionRomSupport.h"
 #include "PciPowerManagement.h"
 #include "PciHotPlugSupport.h"
+#include "PciDoe.h"
 #include "PciLib.h"
 
 #define VGABASE1   0x3B0
@@ -163,6 +164,7 @@ struct _PCI_IO_DEVICE {
   UINT32                                       Signature;
   EFI_HANDLE                                   Handle;
   EFI_PCI_IO_PROTOCOL                          PciIo;
+  EFI_PCI_IO_DOE                               PciDoe;
   LIST_ENTRY                                   Link;
 
   EFI_BUS_SPECIFIC_DRIVER_OVERRIDE_PROTOCOL    PciDriverOverride;
@@ -274,6 +276,9 @@ struct _PCI_IO_DEVICE {
   UINT32                                       SystemPageSize;
   UINT16                                       InitialVFs;
   UINT16                                       ReservedBusNum;
+
+  UINT32                                       DoeCapabilityOffset;
+
   //
   // Per PCI to PCI Bridge spec, I/O window is 4K aligned,
   // but some chipsets support non-standard I/O window alignments less than 4K.
