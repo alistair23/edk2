@@ -2091,10 +2091,13 @@ AuthenticatePciDevice (
   EDKII_DEVICE_IDENTIFIER  DeviceIdentifier;
   EFI_STATUS               Status;
 
+  DEBUG ((DEBUG_INFO,"    AuthenticatePciDevice: One\n"));
+
   if (mDeviceSecurityProtocol != NULL) {
     //
     // Prepare the parameter
     //
+    DEBUG ((DEBUG_INFO,"    AuthenticatePciDevice: Two\n"));
     DeviceIdentifier.Version = EDKII_DEVICE_IDENTIFIER_REVISION;
     CopyGuid (&DeviceIdentifier.DeviceType, &gEdkiiDeviceIdentifierTypePciGuid);
     DeviceIdentifier.DeviceHandle = NULL;
@@ -2107,6 +2110,7 @@ AuthenticatePciDevice (
                                            NULL
                                            );
     if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO,"    AuthenticatePciDevice: Three\n"));
       return Status;
     }
 

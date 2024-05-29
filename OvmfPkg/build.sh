@@ -43,7 +43,7 @@ PLATFORMFILE=
 THREADNUMBER=0
 LAST_ARG=
 RUN_QEMU=no
-ENABLE_FLASH=no
+ENABLE_FLASH=yes
 
 #
 # Pick a default tool type for a given OS

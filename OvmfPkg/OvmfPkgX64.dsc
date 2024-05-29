@@ -32,7 +32,7 @@
   DEFINE SECURE_BOOT_ENABLE      = FALSE
   DEFINE SMM_REQUIRE             = FALSE
   DEFINE SOURCE_DEBUG_ENABLE     = FALSE
-  DEFINE CC_MEASUREMENT_ENABLE   = FALSE
+  DEFINE CC_MEASUREMENT_ENABLE   = TRUE
 
 !include OvmfPkg/Include/Dsc/OvmfTpmDefines.dsc.inc
 
@@ -85,6 +85,8 @@
   DEFINE UP_CPU_DXE_GUID  = 6490f1c5-ebcc-4665-8892-0075b9bb49b7
 
 !include OvmfPkg/Include/Dsc/OvmfPkg.dsc.inc
+
+# !include DeviceSecurityTestPkg/DeviceSecurityTestPkg.dsc
 
 [BuildOptions]
   GCC:RELEASE_*_*_CC_FLAGS             = -DMDEPKG_NDEBUG
@@ -205,6 +207,19 @@
   PeiHardwareInfoLib|OvmfPkg/Library/HardwareInfoLib/PeiHardwareInfoLib.inf
   DxeHardwareInfoLib|OvmfPkg/Library/HardwareInfoLib/DxeHardwareInfoLib.inf
   ImagePropertiesRecordLib|MdeModulePkg/Library/ImagePropertiesRecordLib/ImagePropertiesRecordLib.inf
+
+  SpdmSecurityLib|SecurityPkg/DeviceSecurity/SpdmSecurityLib/SpdmSecurityLib.inf
+  SpdmDeviceSecretLib|SecurityPkg/DeviceSecurity/SpdmLib/SpdmDeviceSecretLibNull.inf
+  SpdmCryptLib|SecurityPkg/DeviceSecurity/SpdmLib/SpdmCryptLib.inf
+  SpdmCommonLib|SecurityPkg/DeviceSecurity/SpdmLib/SpdmCommonLib.inf
+  SpdmRequesterLib|SecurityPkg/DeviceSecurity/SpdmLib/SpdmRequesterLib.inf
+  SpdmResponderLib|SecurityPkg/DeviceSecurity/SpdmLib/SpdmResponderLib.inf
+  SpdmSecuredMessageLib|SecurityPkg/DeviceSecurity/SpdmLib/SpdmSecuredMessageLib.inf
+  SpdmTransportMctpLib|SecurityPkg/DeviceSecurity/SpdmLib/SpdmTransportMctpLib.inf
+  SpdmTransportPciDoeLib|SecurityPkg/DeviceSecurity/SpdmLib/SpdmTransportPciDoeLib.inf
+  CryptlibWrapper|SecurityPkg/DeviceSecurity/OsStub/CryptlibWrapper/CryptlibWrapper.inf
+  PlatformLibWrapper|SecurityPkg/DeviceSecurity/OsStub/PlatformLibWrapper/PlatformLibWrapper.inf
+  MemLibWrapper|SecurityPkg/DeviceSecurity/OsStub/MemLibWrapper/MemLibWrapper.inf
 
 !if $(SMM_REQUIRE) == FALSE
   LockBoxLib|OvmfPkg/Library/LockBoxLib/LockBoxBaseLib.inf
@@ -541,6 +556,8 @@
 
   gEfiMdePkgTokenSpaceGuid.PcdReportStatusCodePropertyMask|0x07
 
+  gEfiMdeModulePkgTokenSpaceGuid.PcdEnableSpdmDeviceAuthenticaion|1
+
   # DEBUG_INIT      0x00000001  // Initialization
   # DEBUG_WARN      0x00000002  // Warnings
   # DEBUG_LOAD      0x00000004  // Load events
@@ -796,8 +813,14 @@
 
   MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
 
+  DeviceSecurityTestPkg/SpdmDeviceSecurityDxe/SpdmDeviceSecurityDxe.inf
+
   MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf {
     <LibraryClasses>
+      SpdmSecurityLib|SecurityPkg/DeviceSecurity/SpdmSecurityLib/SpdmSecurityLib.inf
+      NULL|SecurityPkg/DeviceSecurity/SpdmLib/SpdmCommonLib.inf
+      NULL|SecurityPkg/DeviceSecurity/SpdmLib/SpdmTransportPciDoeLib.inf
+      NULL|SecurityPkg/DeviceSecurity/SpdmLib/SpdmRequesterLib.inf
 !if $(SECURE_BOOT_ENABLE) == TRUE
       NULL|SecurityPkg/Library/DxeImageVerificationLib/DxeImageVerificationLib.inf
 !endif
@@ -842,6 +865,9 @@
   MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf {
     <LibraryClasses>
       PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
+      NULL|SecurityPkg/DeviceSecurity/SpdmLib/SpdmCommonLib.inf
+      NULL|SecurityPkg/DeviceSecurity/SpdmLib/SpdmTransportPciDoeLib.inf
+      NULL|SecurityPkg/DeviceSecurity/SpdmLib/SpdmRequesterLib.inf
   }
   MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
   MdeModulePkg/Universal/Metronome/Metronome.inf
@@ -912,6 +938,34 @@
   OvmfPkg/QemuVideoDxe/QemuVideoDxe.inf
   OvmfPkg/QemuRamfbDxe/QemuRamfbDxe.inf
   OvmfPkg/VirtioGpuDxe/VirtioGpu.inf
+
+  DeviceSecurityTestPkg/SpdmDeviceSecurityDxe/SpdmDeviceSecurityDxe.inf
+  DeviceSecurityTestPkg/Test/DeviceSecurityPolicyStub/DeviceSecurityPolicyStub.inf
+  DeviceSecurityTestPkg/Test/Tcg2Stub/Tcg2Stub.inf {
+  <LibraryClasses>
+    Tpm2CommandLib|SecurityPkg/Library/Tpm2CommandLib/Tpm2CommandLib.inf
+    Tpm2DeviceLib|DeviceSecurityTestPkg/Test/Tpm2DeviceLibTestStub/Tpm2DeviceLibTestStub.inf
+    HashLib|DeviceSecurityTestPkg/Test/HashLibBaseCryptoRouterTestStub/HashLibBaseCryptoRouterTestStub.inf
+    NULL|SecurityPkg/Library/HashInstanceLibSha384/HashInstanceLibSha384.inf
+  }
+  DeviceSecurityTestPkg/Test/PciIoStub/PciIoStub.inf
+  DeviceSecurityTestPkg/Test/SpdmStub/SpdmStub.inf {
+  <LibraryClasses>
+    SpdmDeviceSecretLib|DeviceSecurityTestPkg/Test/SpdmDeviceSecretLibTestStub/SpdmDeviceSecretLibTestStub.inf
+  }
+  DeviceSecurityTestPkg/Test/TestSpdm/TestSpdm.inf
+  DeviceSecurityTestPkg/Test/DeployCert/DeployCert.inf {
+  <LibraryClasses>
+    Tpm2CommandLib|SecurityPkg/Library/Tpm2CommandLib/Tpm2CommandLib.inf
+    Tpm2DeviceLib|SecurityPkg/Library/Tpm2DeviceLibTcg2/Tpm2DeviceLibTcg2.inf
+  }
+
+
+  DeviceSecurityTestPkg/Test/PciIoPciDoeStub/PciIoPciDoeStub.inf {
+  <LibraryClasses>
+    SpdmDeviceSecretLib|DeviceSecurityTestPkg/Test/SpdmDeviceSecretLibTestStub/SpdmDeviceSecretLibTestStub.inf
+  }
+  DeviceSecurityTestPkg/Test/SpdmPciDoeStub/SpdmPciDoeStub.inf
 
   #
   # ISA Support
@@ -1085,6 +1139,7 @@
     <LibraryClasses>
       HashLib|SecurityPkg/Library/HashLibTdx/HashLibTdx.inf
       NULL|SecurityPkg/Library/HashInstanceLibSha384/HashInstanceLibSha384.inf
+      SpdmSecurityLib|SecurityPkg/DeviceSecurity/SpdmSecurityLib/SpdmSecurityLib.inf
   }
 !endif
 

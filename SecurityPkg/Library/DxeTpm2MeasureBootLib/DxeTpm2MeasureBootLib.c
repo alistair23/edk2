@@ -395,11 +395,11 @@ Tcg2MeasurePeImage (
   EFI_IMAGE_LOAD_EVENT         *ImageLoad;
   UINT32                       FilePathSize;
   UINT32                       EventSize;
-  EFI_CC_EVENT                 *CcEvent;
+  // EFI_CC_EVENT                 *CcEvent;
   EFI_CC_MEASUREMENT_PROTOCOL  *CcProtocol;
   EFI_TCG2_PROTOCOL            *Tcg2Protocol;
   UINT8                        *EventPtr;
-  EFI_CC_MR_INDEX              MrIndex;
+  // EFI_CC_MR_INDEX              MrIndex;
 
   Status    = EFI_UNSUPPORTED;
   ImageLoad = NULL;
@@ -472,37 +472,37 @@ Tcg2MeasurePeImage (
     CopyMem (ImageLoad->DevicePath, FilePath, FilePathSize);
   }
 
-  //
-  // Log the PE data
-  //
-  if (CcProtocol != NULL) {
-    Status = CcProtocol->MapPcrToMrIndex (CcProtocol, Tcg2Event->Header.PCRIndex, &MrIndex);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "Cannot map PcrIndex(%d) to MrIndex\n", Tcg2Event->Header.PCRIndex));
-      goto Finish;
-    }
+  // //
+  // // Log the PE data
+  // //
+  // if (CcProtocol != NULL) {
+  //   Status = CcProtocol->MapPcrToMrIndex (CcProtocol, Tcg2Event->Header.PCRIndex, &MrIndex);
+  //   if (EFI_ERROR (Status)) {
+  //     DEBUG ((DEBUG_ERROR, "Cannot map PcrIndex(%d) to MrIndex\n", Tcg2Event->Header.PCRIndex));
+  //     goto Finish;
+  //   }
 
-    CcEvent                 = (EFI_CC_EVENT *)EventPtr;
-    CcEvent->Header.MrIndex = MrIndex;
+  //   CcEvent                 = (EFI_CC_EVENT *)EventPtr;
+  //   CcEvent->Header.MrIndex = MrIndex;
 
-    Status = CcProtocol->HashLogExtendEvent (
-                           CcProtocol,
-                           PE_COFF_IMAGE,
-                           ImageAddress,
-                           ImageSize,
-                           CcEvent
-                           );
-    DEBUG ((DEBUG_INFO, "DxeTpm2MeasureBootHandler - Cc MeasurePeImage - %r\n", Status));
-  } else if (Tcg2Protocol != NULL) {
-    Status = Tcg2Protocol->HashLogExtendEvent (
-                             Tcg2Protocol,
-                             PE_COFF_IMAGE,
-                             ImageAddress,
-                             ImageSize,
-                             Tcg2Event
-                             );
-    DEBUG ((DEBUG_INFO, "DxeTpm2MeasureBootHandler - Tcg2 MeasurePeImage - %r\n", Status));
-  }
+  //   Status = CcProtocol->HashLogExtendEvent (
+  //                          CcProtocol,
+  //                          PE_COFF_IMAGE,
+  //                          ImageAddress,
+  //                          ImageSize,
+  //                          CcEvent
+  //                          );
+  //   DEBUG ((DEBUG_INFO, "DxeTpm2MeasureBootHandler - Cc MeasurePeImage - %r\n", Status));
+  // } else if (Tcg2Protocol != NULL) {
+  //   Status = Tcg2Protocol->HashLogExtendEvent (
+  //                            Tcg2Protocol,
+  //                            PE_COFF_IMAGE,
+  //                            ImageAddress,
+  //                            ImageSize,
+  //                            Tcg2Event
+  //                            );
+  //   DEBUG ((DEBUG_INFO, "DxeTpm2MeasureBootHandler - Tcg2 MeasurePeImage - %r\n", Status));
+  // }
 
   if (Status == EFI_VOLUME_FULL) {
     //
